@@ -5,7 +5,6 @@
 from itertools import izip
 
 from scrapy.spiders import Spider
-
 import wrtscrapper.items
 
 
@@ -55,7 +54,7 @@ class OpenwrtTOH(Spider):
                         Brand.objects.get_or_create(name=brand)
             else:
                 for table_selector in selector.xpath("self::table"):
-                    for item in self.parse_table(table_selector):
+                    for item in self.parse_table(table_selector, brand_object):
                         yield item
 
     def parse_table(self, table_selector, brand_object):
