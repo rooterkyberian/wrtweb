@@ -11,5 +11,7 @@ BOT_NAME = 'wrtscrapper'
 SPIDER_MODULES = ['wrtscrapper.spiders']
 NEWSPIDER_MODULE = 'wrtscrapper.spiders'
 
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'wrtscrapper (+http://www.yourdomain.com)'
+DOWNLOAD_DELAY = 2
+REDIRECT_MAX_TIMES = 8
+
+ITEM_PIPELINES = {"wrtscrapper.pipelines.WrtscrapperPipeline": 800}

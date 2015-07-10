@@ -3,14 +3,14 @@
 # See documentation in:
 # http://doc.scrapy.org/en/latest/topics/items.html
 
-from scrapy.item import Item, Field
-
 import os
+
 os.environ['DJANGO_SETTINGS_MODULE'] = 'wrtweb.settings'
 from scrapy_djangoitem import DjangoItem
 
-from wrtprices.models import Device, PriceOffer
-
+from wrtprices.models import Device, PriceOffer, PriceSummary, Brand
+import django
+django.setup()
 
 
 class DeviceItem(DjangoItem):
@@ -19,3 +19,7 @@ class DeviceItem(DjangoItem):
 
 class PriceOfferItem(DjangoItem):
     django_model = PriceOffer
+
+
+class PriceSummaryItem(DjangoItem):
+    django_model = PriceSummary

@@ -6,7 +6,7 @@ from itertools import izip
 
 from scrapy.spiders import Spider
 
-from wrtscrapper.items import DeviceItem
+import wrtscrapper.items
 
 
 class OpenwrtTOH(Spider):
@@ -15,6 +15,21 @@ class OpenwrtTOH(Spider):
     start_urls = [
         "http://wiki.openwrt.org/toh/start",
     ]
+
+    name_map = {
+        "Model": "name",
+        "Version": "version",
+        "Status": "status",
+        "Target(s)": "target",
+        "Platform": "platform",
+        "CPU Speed (MHz)": "cpu_speed",
+        "Flash (MB)": "flash",
+        "RAM (MB)": "ram",
+        "Wireless NIC": "wnic",
+        "Wireless Standard": "wireless",
+        "Wired Ports": "wired",
+        "USB": "usb",
+    }
 
     def parse(self, response):
 
@@ -25,19 +40,6 @@ class OpenwrtTOH(Spider):
 
         brand = "Unknown"
         support_group = "X"
-        name_map = {"Model": "name",
-                    "Version": "version",
-                    "Status": "status",
-                    "Target(s)": "target",
-                    "Platform": "platform",
-                    "CPU Speed (MHz)": "cpu_speed",
-                    "Flash (MB)": "flash",
-                    "RAM (MB)": "ram",
-                    "Wireless NIC": "wnic",
-                    "Wireless Standard": "wireless",
-                    "Wired Ports": "wired",
-                    "USB": "usb",
-                    }
 
         for selector in title_n_table_selectors:
             h2_text = selector.xpath("self::h2//text()")
@@ -45,28 +47,48 @@ class OpenwrtTOH(Spider):
             if len(h2_text) > 0:
                 support_group = "".join(h2_text.extract())
             elif len(h3_text) > 0:
-                brand = "".join(h3_text.extract())
-            elif len(selector.xpath("self::table")) > 0:
-                header = []
-                table_selector = selector
-                for ths in table_selector.xpath(".//th"):
-                    field_name = "".join(ths.xpath(".//text()").extract())
-                    header.append(field_name.strip())
+                brand = "".join(h3_text.extract()).strip()
+                if "unbranded" in brand.lower():
+                    brand_object = None
+                else:
+                    brand_object, _created = wrtscrapper.items. \
+                        Brand.objects.get_or_create(name=brand)
+            else:
+                for table_selector in selector.xpath("self::table"):
+                    for item in self.parse_table(table_selector):
+                        yield item
 
-                for trs in table_selector.xpath(
-                        ".//tr/following-sibling::tr"):
-                    hw_dict = {"by": brand, "other": ""}
-                    for field_name, tds in izip(header, trs.xpath(".//td")):
-                        value = "".join(tds.xpath(".//text()").extract())
-                        value = value.strip()
-                        if field_name == "Model":
-                            hw_dict["link"] = " ".join(
-                                tds.xpath(".//a/@href").extract())
+    def parse_table(self, table_selector, brand_object):
+        header = []
+        for ths in table_selector.xpath(".//th"):
+            field_name = "".join(ths.xpath(".//text()").extract())
+            header.append(field_name.strip())
 
-                        if field_name in name_map:
-                            hw_dict[name_map[field_name]] = value
-                        else:
-                            hw_dict["other"] += "%s = %s; " % (
-                                field_name, value)
-                    if "name" in hw_dict:
-                        yield DeviceItem(hw_dict)
+        for trs in table_selector.xpath(".//tr[td]"):
+            hw_dict = {
+                "by": brand_object,
+                "other": ""
+            }
+            for field_name, tds in izip(header,
+                                        trs.xpath(".//td")):
+                value = "".join(tds.xpath(".//text()").extract())
+                value = value.strip()
+
+                if field_name == "Model":
+                    hw_dict["link"] = " ".join(
+                        tds.xpath(".//a/@href").extract())
+
+                if not value:
+                    continue
+
+                if field_name in OpenwrtTOH.name_map:
+                    hw_dict[OpenwrtTOH.name_map[field_name]] = value
+                else:
+                    hw_dict["other"] += "%s = %s; " % (
+                        field_name, value)
+
+            if "name" in hw_dict:
+                if hw_dict.get("version", "").lower() in ("", "-", "?", "ALL"):
+                    hw_dict.pop("version", None)
+
+                yield wrtscrapper.items.DeviceItem(hw_dict)
