@@ -2,6 +2,8 @@
 
 # Copyright (c) 2015 Maciej Urbański <rooter@kyberian.net>
 
+import urlparse
+
 from scrapy.spider import Spider
 from scrapy.http import FormRequest
 
@@ -76,9 +78,10 @@ class AllegroAuc(Spider):
         for auction in auctions:
             item = wrtscrapper.items.PriceOfferItem()
             item["device"] = device
-            item['link'] = AllegroAuc.extract_first_and_strip(
-                auction.xpath(".//h2/a/@href")
-            )
+            item['link'] = urlparse.urljoin(response.url,
+                                            AllegroAuc.extract_first_and_strip(
+                                                auction.xpath(".//h2/a/@href"))
+                                            )
 
             item['price'] = AllegroAuc.clean_to_float(
                 auction.xpath(".//span[contains(@class,'dist')]/text()")
