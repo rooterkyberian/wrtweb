@@ -88,7 +88,8 @@ class OpenwrtTOH(Spider):
                         field_name, value)
 
             if "name" in hw_dict:
-                if hw_dict.get("version", "").lower() in ("", "-", "?", "ALL"):
+                if hw_dict.get("version", "").lower() in ("", "-", "?", "all",
+                                                          "any"):
                     hw_dict.pop("version", None)
 
                 yield wrtscrapper.items.DeviceItem(hw_dict)
