@@ -55,7 +55,11 @@ class Brand(models.Model):
     def __str__(self):
         return self.name
 
+    def devices_count(self):
+        return Device.objects.filter(by=self).count()
 
+
+@django.utils.encoding.python_2_unicode_compatible
 class Device(HashedModel):
     name = models.CharField(max_length=255)
     by = models.ForeignKey(Brand, null=True)
@@ -86,6 +90,9 @@ class Device(HashedModel):
         return hashed.hexdigest()
 
     def __str__(self):
+        return self.fullname()
+
+    def fullname(self):
         ret = ""
         if self.by:
             ret = self.by.name + " "
@@ -94,6 +101,16 @@ class Device(HashedModel):
             ret += " " + self.version
         return ret
 
+    def going_price(self):
+        price_summary = PriceSummary.objects.filter(
+            device=self,
+            invalidated=False,
+        ).latest(field_name='date')
+
+        if price_summary:
+            return price_summary.going_price
+
+        return None
 
 @django.utils.encoding.python_2_unicode_compatible
 class PriceOffer(HashedModel):
@@ -109,10 +126,14 @@ class PriceOffer(HashedModel):
             hashed.update(str(o))
         return hashed.hexdigest()
 
+    def device_name(self):
+        return self.device.fullname()
+
     def __str__(self):
         return "%s @ %s" % (self.link, self.date)
 
 
+@django.utils.encoding.python_2_unicode_compatible
 class PriceSummary(models.Model):
     device = models.ForeignKey(Device)
     going_price = MinMaxFloat(min_value=0.0, null=True)
@@ -121,3 +142,9 @@ class PriceSummary(models.Model):
     validated_offers_count = models.IntegerField(default=0)
     date = models.DateTimeField(auto_now_add=True)
     offers = models.ManyToManyField(PriceOffer)
+
+    def device_name(self):
+        return self.device.fullname()
+
+    def __str__(self):
+        return "%s @ %s" % (self.device.name, self.date)

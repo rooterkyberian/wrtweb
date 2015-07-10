@@ -21,7 +21,7 @@ class AllegroAuc(Spider):
     name = "allegro"
     allowed_domains = ["allegro.pl"]
     # http://allegro.pl/listing/listing.php?order=qd&string=wdr3600&offerTypeBuyNow=1
-    start_urls = ["http://allegro.pl/komputery",]
+    start_urls = ["http://allegro.pl/komputery", ]
 
     def device_queries(self):
         for device in wrtscrapper.items.Device.objects.all():
@@ -30,6 +30,10 @@ class AllegroAuc(Spider):
             yield device, keywords
 
     def form_next_request(self, response):
+        """
+        :type response: scrapy.http.Response
+        """
+
         req = None
         gen = response.meta["device_keywords_generator"]
         try:
@@ -47,6 +51,10 @@ class AllegroAuc(Spider):
         return req
 
     def parse(self, response):
+        """
+        :type response: scrapy.http.Response
+        """
+
         gen = self.device_queries()
         response.meta["device_keywords_generator"] = gen
 
@@ -65,6 +73,9 @@ class AllegroAuc(Spider):
         return float(float_str)
 
     def parse_search_page(self, response):
+        """
+        :type response: scrapy.http.Response
+        """
 
         device = response.meta["auc_item"]
 
