@@ -1,9 +1,9 @@
+import datetime
+import random
 import hashlib
 
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-
-import random
 import django.utils.encoding
 
 
@@ -118,7 +118,7 @@ class PriceOffer(HashedModel):
     device = models.ForeignKey(Device)
     price = MinMaxFloat(min_value=0.0)
     price_with_shipping = MinMaxFloat(min_value=0.0, null=True)
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField()
 
     def _generate_hash(self):
         hashed = hashlib.sha1()
@@ -132,6 +132,12 @@ class PriceOffer(HashedModel):
     def __str__(self):
         return "%s @ %s" % (self.link, self.date)
 
+    def save(self, *args, **kwargs):
+        """ set date if none specified """
+        if not self.date:
+            self.date = datetime.datetime.today()
+        return super(PriceOffer, self).save(*args, **kwargs)
+
 
 @django.utils.encoding.python_2_unicode_compatible
 class PriceSummary(models.Model):
@@ -140,7 +146,7 @@ class PriceSummary(models.Model):
     invalidated = models.BooleanField(default=False)
     offers_count = models.IntegerField(default=0)
     validated_offers_count = models.IntegerField(default=0)
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField()
     offers = models.ManyToManyField(PriceOffer)
 
     def device_name(self):
@@ -148,3 +154,9 @@ class PriceSummary(models.Model):
 
     def __str__(self):
         return "%s @ %s" % (self.device.name, self.date)
+
+    def save(self, *args, **kwargs):
+        """ set date if none specified """
+        if not self.date:
+            self.date = datetime.datetime.today()
+        return super(PriceOffer, self).save(*args, **kwargs)
