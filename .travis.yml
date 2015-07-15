@@ -1,0 +1,13 @@
+language: python
+deploy:
+  provider: heroku
+  buildpack: python
+  api_key:
+    secure: Qe0qtgFSTzny6YBwLlGfSx6vC0IWqfSLK3frMskTKjWkWE1KGrea6XmnC0nWBvLymThnS8gDHvJzQ9a3IogE9/PG/jc5i1RrGWGiXilY66S/kQsa5tF4jmliTg6UuZE56zKkDlPzzXLqKve1P+WUGygXJb5vgNpyOrujdqtzskoehRY2RFM/m5sDQ0IobZ5bMeE27gGXVLU5hrRvDlIryLccO9HWz1KsmqREJBgCpHK2C54HXeAUha5mnIXUxjzDmcJB5/WFpEYxacY83am64UVyBTZ2OBl97BUMXMOblWlJwLSDM01HQhkCV9nblKglg69hbynhyCmP1FN8mIF+nu7W9qwNdpR7UUBAu9PTp7NW+oyow4uqxJ8Zc1K0aX7y0cK6i1SFZjTOZCPmrD1HZrKHm3e8bGGpuC/VGR1tUxVbmOEqc/UeFVre89/ga1gDyU6a6kOl6ygwVQeCROoXlQhIdexPkw6boEoj91v5rGROWpZbd0inYQECf2pKH898euw8zCRbBIkIZwrd4xwv7hMGP55jTU8ltJL6b52DrbhJzZEfabQZsJK7M/VwTCDCvEi/fPr6k1qp/FVqSwg2l5ZMAGDRA00iFGDsNx3Sw2hRD+3/vYsjGhbT+Jcqu/J+QqBhiVmxg5tdeALTFfcYUreuDGHtFDOU+KAy5aEBuRk=
+  strategy: git
+  app: wrtweb-prime
+  on:
+    repo: rooterkyberian/wrtweb
+  run:
+    - "python ./manage.py migrate --all"
+    - restart
