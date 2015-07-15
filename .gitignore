@@ -111,6 +111,7 @@ crashlytics-build.properties
 
 ## Data garbage
 db.sqlite3
+staticfiles
 
 #virtualenv
 venv
