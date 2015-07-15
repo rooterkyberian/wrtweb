@@ -7,6 +7,8 @@ from wrtprices.models import Device
 
 
 class DeviceTable(tables.Table):
+    going_price = tables.Column(orderable=False)
+
     class Meta:
         model = Device
         fields = (
@@ -14,7 +16,7 @@ class DeviceTable(tables.Table):
             "status", "target", "platform",
             "cpu_speed", "flash", "ram",
             "wnic", "wireless", "wired", "usb",
-            "other"
+            "other", "going_price"
         )
         order_by = ("by", "name", "version")
 
