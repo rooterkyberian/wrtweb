@@ -5,7 +5,7 @@ services:
   - postgresql
 env:
   global:
-    - DATABASE_URL=postgres://%2Fvar%2Flib%2Fpostgresql/testdb
+    - DATABASE_URL=postgres://localhost/testdb
 before_script:
   - psql -c 'create database testdb;' -U postgres
 script: ./manage.py test
