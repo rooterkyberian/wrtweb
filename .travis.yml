@@ -1,4 +1,14 @@
 language: python
+install:
+ - "pip install -r requirements.txt"
+services:
+  - postgresql
+env:
+  global:
+    - DATABASE_URL=postgres://%2Fvar%2Flib%2Fpostgresql/testdb
+before_script:
+  - psql -c 'create database testdb;' -U postgres
+script: ./manage.py test
 deploy:
   provider: heroku
   buildpack: python
