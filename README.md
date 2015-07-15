@@ -1,6 +1,6 @@
 # Webcatalog of wireless devices compatible with OpenWrt.
 
-[![Build Status](https://api.travis-ci.org/rooterkyberian/wrtweb.svg?branch=heroku)](https://travis-ci.org/rooterkyberian/wrtweb)
+[![Build Status](https://api.travis-ci.org/rooterkyberian/wrtweb.svg)](https://travis-ci.org/rooterkyberian/wrtweb)
 
 
 The catalog is created by scrapping device info from OpenWrt wiki and then
