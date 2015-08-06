@@ -160,4 +160,4 @@ class PriceSummary(models.Model):
         """ set date if none specified """
         if not self.date:
             self.date = datetime.datetime.today()
-        return super(PriceOffer, self).save(*args, **kwargs)
+        return super(PriceSummary, self).save(*args, **kwargs)

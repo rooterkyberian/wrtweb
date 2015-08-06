@@ -87,27 +87,31 @@ class AllegroAuc(Spider):
 
         auctions = response.xpath('//article')
         for auction in auctions:
-            item = wrtscrapper.items.PriceOfferItem()
-            item["device"] = device
-            item['link'] = urlparse.urljoin(response.url,
-                                            AllegroAuc.extract_first_and_strip(
-                                                auction.xpath(".//h2/a/@href"))
-                                            )
-
-            item['price'] = AllegroAuc.clean_to_float(
-                auction.xpath(".//span[contains(@class,'dist')]/text()")
-            )
-            prices.append(item['price'])
-
             try:
-                item['price_with_shipping'] = AllegroAuc.clean_to_float(
-                    auction.xpath(".//span[@class='delivery']/text()")
+                item = wrtscrapper.items.PriceOfferItem()
+                item["device"] = device
+                item['link'] = urlparse.urljoin(
+                    response.url,
+                    AllegroAuc.extract_first_and_strip(
+                        auction.xpath(".//h2/a/@href"))
                 )
-            except ValueError:
-                pass
+                item['price'] = AllegroAuc.clean_to_float(
+                    auction.xpath(".//span[contains(@class,'dist')]/text()")
+                )
+                prices.append(item['price'])
 
-            auction_objs.append(item.instance)
-            yield item
+                try:
+                    item['price_with_shipping'] = AllegroAuc.clean_to_float(
+                        auction.xpath(".//span[@class='delivery']/text()")
+                    )
+                except ValueError:
+                    pass
+
+                auction_objs.append(item.instance)
+                yield item
+            except ValueError:
+                import traceback
+                self.logger.warning(traceback.format_exc())
 
         auc_sum["offers_count"] = len(prices)
         if auc_sum["offers_count"] > 0:
