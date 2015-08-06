@@ -14,13 +14,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Brand',
             fields=[
-                ('name', models.CharField(max_length=255, serialize=False, primary_key=True)),
+                ('name', models.CharField(max_length=255, serialize=False,
+                                          primary_key=True)),
             ],
         ),
         migrations.CreateModel(
             name='Device',
             fields=[
-                ('hash', models.CharField(max_length=40, serialize=False, primary_key=True)),
+                ('hash', models.CharField(max_length=40, serialize=False,
+                                          primary_key=True)),
                 ('name', models.CharField(max_length=255)),
                 ('version', models.CharField(max_length=255, null=True)),
                 ('link', models.URLField()),
@@ -44,10 +46,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PriceOffer',
             fields=[
-                ('hash', models.CharField(max_length=40, serialize=False, primary_key=True)),
+                ('hash', models.CharField(max_length=40, serialize=False,
+                                          primary_key=True)),
                 ('link', models.URLField()),
                 ('price', wrtprices.models.MinMaxFloat()),
-                ('price_with_shipping', wrtprices.models.MinMaxFloat(null=True)),
+                ('price_with_shipping',
+                 wrtprices.models.MinMaxFloat(null=True)),
                 ('date', models.DateTimeField(auto_now_add=True)),
                 ('device', models.ForeignKey(to='wrtprices.Device')),
             ],
@@ -58,7 +62,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PriceSummary',
             fields=[
-                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('id', models.AutoField(verbose_name='ID', serialize=False,
+                                        auto_created=True, primary_key=True)),
                 ('going_price', wrtprices.models.MinMaxFloat(null=True)),
                 ('invalidated', models.BooleanField(default=False)),
                 ('offers_count', models.IntegerField(default=0)),

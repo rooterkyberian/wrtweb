@@ -37,15 +37,10 @@ class OpenwrtTOH(Spider):
         title_n_table_selectors = toh.xpath(
             "h2 | h3 | div[@class='level3']//table")
 
-        brand = "Unknown"
-        support_group = "X"
-
+        brand_object = None
         for selector in title_n_table_selectors:
-            h2_text = selector.xpath("self::h2//text()")
             h3_text = selector.xpath("self::h3//text()")
-            if len(h2_text) > 0:
-                support_group = "".join(h2_text.extract())
-            elif len(h3_text) > 0:
+            if len(h3_text) > 0:
                 brand = "".join(h3_text.extract()).strip()
                 if "unbranded" in brand.lower():
                     brand_object = None

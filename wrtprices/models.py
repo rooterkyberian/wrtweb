@@ -36,8 +36,8 @@ class HashedModel(models.Model):
     hash = models.CharField(max_length=HASH_HEXLEN, primary_key=True)
 
     def _generate_hash(self):
-        hash = '%030x' % random.randrange(16 ** HashedModel.HASH_HEXLEN)
-        return hash
+        hashed = '%030x' % random.randrange(16 ** HashedModel.HASH_HEXLEN)
+        return hashed
 
     def save(self, *args, **kwargs):
         if not self.hash:
@@ -111,6 +111,7 @@ class Device(HashedModel):
             return price_summary.going_price
 
         return None
+
 
 @django.utils.encoding.python_2_unicode_compatible
 class PriceOffer(HashedModel):
