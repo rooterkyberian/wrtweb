@@ -3,8 +3,9 @@
 # Copyright (c) 2015 Maciej Urbański <rooter@kyberian.net>
 
 import urlparse
+import re
 
-from scrapy.spider import Spider
+from scrapy.spiders import Spider
 from scrapy.http import FormRequest
 
 import wrtscrapper.items
@@ -22,6 +23,8 @@ class AllegroAuc(Spider):
     allowed_domains = ["allegro.pl"]
     # http://allegro.pl/listing/listing.php?order=qd&string=wdr3600&offerTypeBuyNow=1
     start_urls = ["http://allegro.pl/komputery", ]
+
+    PRICE_REGEXP = re.compile(r'[^\d]*([\d\s]+(,\d{1,2})?)\s+')
 
     def device_queries(self):
         for device in wrtscrapper.items.Device.objects.all():
@@ -67,10 +70,16 @@ class AllegroAuc(Spider):
         return None
 
     @staticmethod
-    def clean_to_float(selector):
-        float_str = "".join(selector.extract()).strip()
-        float_str = float_str.replace(",", ".")
-        return float(float_str)
+    def price_to_float(selector):
+        text = ''.join(selector.extract()).strip()
+        match = re.match(AllegroAuc.PRICE_REGEXP, text)
+
+        if match is None:
+            raise ValueError("""Price tag not found in string '%s'.""" % text)
+
+        price_tag = match.group(1)
+        price_tag = price_tag.replace(' ', '').replace(',', '.', 1)
+        return float(price_tag)
 
     def parse_search_page(self, response):
         """
@@ -85,7 +94,7 @@ class AllegroAuc(Spider):
         prices = []
         auction_objs = []
 
-        auctions = response.xpath('//article')
+        auctions = response.xpath("""//article[contains(@class,'offer')]""")
         for auction in auctions:
             try:
                 item = wrtscrapper.items.PriceOfferItem()
@@ -95,23 +104,36 @@ class AllegroAuc(Spider):
                     AllegroAuc.extract_first_and_strip(
                         auction.xpath(".//h2/a/@href"))
                 )
-                item['price'] = AllegroAuc.clean_to_float(
-                    auction.xpath(".//span[contains(@class,'dist')]/text()")
+                item['price'] = AllegroAuc.price_to_float(
+                    auction.xpath(
+                        ".//div["
+                        "contains(@class,'offer-price') or"
+                        "contains(@class,'price')"
+                        "]//text()"
+                    )
                 )
                 prices.append(item['price'])
 
                 try:
-                    item['price_with_shipping'] = AllegroAuc.clean_to_float(
-                        auction.xpath(".//span[@class='delivery']/text()")
+                    delivery_price_selector = auction.xpath(
+                        ".//span[contains(@class,'offer-delivery')]//text()"
+                    )
+
+                    item['price_with_shipping'] = AllegroAuc.price_to_float(
+                        delivery_price_selector
                     )
                 except ValueError:
-                    pass
+                    self.logger.debug("No shipping price")
 
                 auction_objs.append(item.instance)
                 yield item
             except ValueError:
                 import traceback
-                self.logger.warning(traceback.format_exc())
+                self.logger.debug(traceback.format_exc())
+                self.logger.warning(
+                    'Exception raised during parsing of %s at %s'
+                    % (auction.extract(), response.url)
+                )
 
         auc_sum["offers_count"] = len(prices)
         if auc_sum["offers_count"] > 0:
