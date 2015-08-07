@@ -51,23 +51,3 @@ class DeviceTestCase(TestCase):
         with self.assertRaises(IntegrityError):
             Device.objects.create(name=device.name, by=device.by,
                                   version=device.version)
-
-    def test_unique(self):
-        device = Device.objects.first()
-
-        with self.assertRaises(IntegrityError):
-            Device.objects.create(name=device.name, by=device.by,
-                                  version=device.version)
-
-    def test_unique_modified(self):
-        device = Device.objects.first()
-        if device.version is None:
-            device.version = 'v1'
-        device.version += '.2'
-        device.save()
-
-        with self.assertRaises(IntegrityError):
-            Device.objects.create(name=device.name,
-                                  by=device.by,
-                                  version=device.version)
-
