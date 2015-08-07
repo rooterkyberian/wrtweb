@@ -5,6 +5,7 @@ import hashlib
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 import django.utils.encoding
+from django.utils import timezone
 
 
 class MinMaxFloat(models.FloatField):
@@ -133,7 +134,7 @@ class PriceOffer(HashedModel):
     def save(self, *args, **kwargs):
         """ set date if none specified """
         if not self.date:
-            self.date = datetime.datetime.today()
+            self.date = timezone.now()
         return super(PriceOffer, self).save(*args, **kwargs)
 
 
@@ -156,5 +157,5 @@ class PriceSummary(models.Model):
     def save(self, *args, **kwargs):
         """ set date if none specified """
         if not self.date:
-            self.date = datetime.datetime.today()
+            self.date = timezone.now()
         return super(PriceSummary, self).save(*args, **kwargs)
