@@ -12,6 +12,18 @@ import wrtscrapper.items
 
 
 def median(l):
+    """
+    Calculate median for the input list.
+    :param l:list of numbers
+    :return:median value of the input
+
+    >>> median([9])
+    9
+    >>> median([13,11])
+    12
+    >>> median([10,13,11])
+    11
+    """
     m, r = divmod(len(l), 2)
     if r:
         return sorted(l)[m]
