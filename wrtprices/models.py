@@ -81,6 +81,8 @@ class Device(HashedModel):
 
     other = models.TextField()
 
+    price_info = models.ForeignKey('PriceSummary', related_name='+', null=True)
+
     def _generate_hash(self):
         hashed = hashlib.sha1()
         if self.by:
@@ -102,13 +104,8 @@ class Device(HashedModel):
         return ret
 
     def going_price(self):
-        price_summary = PriceSummary.objects.filter(
-            device=self,
-            invalidated=False,
-        ).latest(field_name='date')
-
-        if price_summary:
-            return price_summary.going_price
+        if self.price_info:
+            return self.price_info.going_price
 
         return None
 
