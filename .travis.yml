@@ -19,5 +19,5 @@ deploy:
   on:
     repo: rooterkyberian/wrtweb
   run:
-    - "python ./manage.py migrate --all"
+    - "python ./manage.py migrate"
     - restart
