@@ -152,7 +152,7 @@ class AllegroAuc(Spider):
             auc_sum["going_price"] = median(prices)
             auc_sum.save()
             map(auc_sum.instance.offers.add, auction_objs)
-            device.price_info = auc_sum.instance()
+            device.price_info = auc_sum.instance
             device.save()
             yield auc_sum
 
