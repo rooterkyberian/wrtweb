@@ -38,6 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'bootstrap3',
     'django_tables2',
     'wrtprices',
 )
@@ -118,3 +119,8 @@ STATIC_URL = '/static/'
 TEMPLATE_DIRS = (
     os.path.join(BASE_DIR, 'wrtprices/templates'),
 )
+
+BOOTSTRAP3 = {
+    'javascript_in_head': True,
+    'include_jquery': True,
+}

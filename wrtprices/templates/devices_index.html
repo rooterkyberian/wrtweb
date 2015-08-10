@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}OpenWrt Table of Hardware{% endblock %}
+
+{% block scripts %}
+    <script type="text/javascript"
+            src="http://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript">
+        function slice_url(url) {
+            var slices = url.split("?", 2);
+            return {base: slices[0], query_params: slices.length > 1 ? slices[1] : ""}
+        }
+
+        function pagination_onoff(element, url) {
+            var a = element.find("a");
+            a.off("click");
+            if (url) {
+                var href_url = slice_url(window.location.href).base + "?" + slice_url(url).query_params;
+                a.attr("href", href_url);
+                a.on("click", function (event) {
+                    event.preventDefault();
+                    fetch_toh(url);
+                });
+                element.removeClass("disabled");
+            } else {
+                a.attr("href", "#");
+                element.addClass("disabled");
+            }
+        }
+
+        function fetch_toh(request_url) {
+            $.getJSON(request_url, function (data) {
+                var table_div = $('#devices_table_container');
+                var pagination = table_div.find(".pagination");
+                var prev = pagination.find(".prev")
+                var next = pagination.find(".next")
+                var cur = pagination.find(".cur")
+                pagination_onoff(prev, data.previous);
+                pagination_onoff(next, data.next);
+                pagination_onoff(cur, request_url);
+
+                var table = table_div.find("table");
+                table.empty();
+
+                $.each(data.results, function (index, item) {
+                    if (index == 0) {
+                        thead = $("<thead/>");
+                        $.each(item, function (key, value) {
+                            thead.append($("<th/>").text(key))
+                        });
+
+                        table.append(thead);
+                    }
+
+                    row = $("<tr/>");
+                    $.each(item, function (key, value) {
+                        row.append($("<td/>").text(value))
+                    });
+                    table.append(row);
+
+                });
+            });
+        }
+
+        $(document).ready(function () {
+            fetch_toh("api/v1/devices{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}");
+        });
+    </script>
+{% endblock %}
+
+{% block content %}
+    <div id="devices_table_container">
+        <ul class="pagination">
+            <li class="prev"><a href="#">&laquo;</a></li>
+            <li class="cur active"><a href="#">1</a></li>
+            <li class="next"><a href="#">&raquo;</a></li>
+        </ul>
+        <table id="devices_table" class="table table-striped table-bordered"
+               width="100%" cellspacing="0">
+        </table>
+    </div>
+{% endblock %}
